@@ -15,7 +15,7 @@ pub use crate::val::SqlxBindable;
 pub use sqlb_macros::Fields;
 use sqlx::Executor;
 use sqlx::FromRow;
-use sqlx::Postgres;
+use sqlx::Sqlite;
 
 #[derive(Debug)]
 pub struct Field<'a> {
@@ -116,22 +116,22 @@ pub trait SqlBuilder<'a> {
 
 	async fn fetch_one<'e, DB, D>(&'a self, db_pool: DB) -> Result<D, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send;
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send;
 
 	async fn fetch_optional<'e, DB, D>(&'a self, db_pool: DB) -> Result<Option<D>, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send;
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send;
 
 	async fn fetch_all<'e, DB, D>(&'a self, db_pool: DB) -> Result<Vec<D>, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send;
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send;
 
 	async fn exec<'q, DB>(&'a self, db_pool: DB) -> Result<u64, sqlx::Error>
 	where
-		DB: Executor<'q, Database = Postgres>;
+		DB: Executor<'q, Database = Sqlite>;
 }
 
 pub trait Whereable<'a> {

@@ -2,7 +2,7 @@ use crate::core::{into_returnings, sql_comma_names, sql_comma_params, sql_return
 use crate::utils::x_table_name;
 use crate::{sqlx_exec, Field, SqlBuilder, SqlxBindable};
 use async_trait::async_trait;
-use sqlx::{Executor, FromRow, Postgres};
+use sqlx::{Executor, FromRow, Sqlite};
 
 pub fn insert<'a>() -> InsertSqlBuilder<'a> {
 	InsertSqlBuilder {
@@ -37,31 +37,31 @@ impl<'a> InsertSqlBuilder<'a> {
 
 	pub async fn exec<'q, DB>(&'a self, db_pool: DB) -> Result<u64, sqlx::Error>
 	where
-		DB: Executor<'q, Database = Postgres>,
+		DB: Executor<'q, Database = Sqlite>,
 	{
 		sqlx_exec::exec(db_pool, self).await
 	}
 
 	pub async fn fetch_one<'e, DB, D>(&'a self, db_pool: DB) -> Result<D, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send,
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send,
 	{
 		sqlx_exec::fetch_as_one::<DB, D, _>(db_pool, self).await
 	}
 
 	pub async fn fetch_optional<'e, DB, D>(&'a self, db_pool: DB) -> Result<Option<D>, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send,
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send,
 	{
 		sqlx_exec::fetch_as_optional::<DB, D, _>(db_pool, self).await
 	}
 
 	pub async fn fetch_all<'e, DB, D>(&'a self, db_pool: DB) -> Result<Vec<D>, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send,
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send,
 	{
 		sqlx_exec::fetch_as_all::<DB, D, _>(db_pool, self).await
 	}
@@ -102,31 +102,31 @@ impl<'a> SqlBuilder<'a> for InsertSqlBuilder<'a> {
 
 	async fn exec<'q, DB>(&'a self, db_pool: DB) -> Result<u64, sqlx::Error>
 	where
-		DB: Executor<'q, Database = Postgres>,
+		DB: Executor<'q, Database = Sqlite>,
 	{
 		Self::exec(self, db_pool).await
 	}
 
 	async fn fetch_one<'e, DB, D>(&'a self, db_pool: DB) -> Result<D, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send,
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send,
 	{
 		Self::fetch_one::<DB, D>(self, db_pool).await
 	}
 
 	async fn fetch_optional<'e, DB, D>(&'a self, db_pool: DB) -> Result<Option<D>, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send,
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send,
 	{
 		Self::fetch_optional::<DB, D>(self, db_pool).await
 	}
 
 	async fn fetch_all<'e, DB, D>(&'a self, db_pool: DB) -> Result<Vec<D>, sqlx::Error>
 	where
-		DB: Executor<'e, Database = Postgres>,
-		D: for<'r> FromRow<'r, sqlx::postgres::PgRow> + Unpin + Send,
+		DB: Executor<'e, Database = Sqlite>,
+		D: for<'r> FromRow<'r, sqlx::sqlite::SqliteRow> + Unpin + Send,
 	{
 		Self::fetch_all::<DB, D>(self, db_pool).await
 	}

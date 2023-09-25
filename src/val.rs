@@ -10,8 +10,8 @@ use uuid::Uuid;
 pub trait SqlxBindable: std::fmt::Debug {
 	fn bind_query<'q>(
 		&'q self,
-		query: sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments>,
-	) -> sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments>;
+		query: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>,
+	) -> sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>;
 
 	fn raw(&self) -> Option<&str> {
 		None
@@ -22,14 +22,14 @@ pub trait SqlxBindable: std::fmt::Debug {
 macro_rules! bindable {
     ($($t:ty),*) => {
         $(impl $crate::SqlxBindable for $t {
-            fn bind_query<'q>(&self, query: sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments>) -> sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments> {
+            fn bind_query<'q>(&'q self, query: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>) -> sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>> {
                 let query = query.bind(self.clone());
                 query
             }
         }
 
         impl $crate::SqlxBindable for &$t {
-            fn bind_query<'q>(&self, query: sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments>) -> sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments> {
+            fn bind_query<'q>(&'q self, query: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>) -> sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>> {
                 let query = query.bind(<$t>::clone(self));
                 query
             }
@@ -44,14 +44,14 @@ macro_rules! bindable_to_string {
 	($($t:ident),*) => {
 		$(
 		impl $crate::SqlxBindable for $t {
-			fn bind_query<'q>(&self, query: sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments>) -> sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments> {
+			fn bind_query<'q>(&'q self, query: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>) -> sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>> {
 				let query = query.bind(self.to_string());
 				query
 			}
 		}
 
 		impl $crate::SqlxBindable for &$t {
-			fn bind_query<'q>(&self, query: sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments>) -> sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments> {
+			fn bind_query<'q>(&'q self, query: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>) -> sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>> {
 				let query = query.bind(self.to_string());
 				query
 			}
@@ -66,13 +66,13 @@ bindable_to_string!(String, str);
 impl<T> SqlxBindable for Option<T>
 where
 	T: SqlxBindable + Clone + Send,
-	T: for<'r> sqlx::Encode<'r, sqlx::Postgres>,
-	T: sqlx::Type<sqlx::Postgres>,
+	T: for<'r> sqlx::Encode<'r, sqlx::Sqlite>,
+	T: sqlx::Type<sqlx::Sqlite>,
 {
 	fn bind_query<'q>(
 		&'q self,
-		query: sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments>,
-	) -> sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments> {
+		query: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>,
+	) -> sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>> {
 		let query = query.bind(self.clone());
 		query
 	}
@@ -105,8 +105,8 @@ impl SqlxBindable for Raw {
 	// just return the query given, since no binding should be taken place
 	fn bind_query<'q>(
 		&self,
-		query: sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments>,
-	) -> sqlx::query::Query<'q, sqlx::Postgres, sqlx::postgres::PgArguments> {
+		query: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>,
+	) -> sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>> {
 		query
 	}
 
